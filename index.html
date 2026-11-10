@@ -142,7 +142,7 @@ M6.map((m,j)=>`<tr><td class="l"><b>${m}</b></td><td class="l" data-cz="${j}"></
 <h3>Paso 4 · Las 3 causas más importantes (de mayor a menor)</h3><div class="top3">`+[1,2,3].map(r=>`<div class="t3"><h4 id="${p}H${r}"><span class="r">${r}</span>Se llena con tu tabla</h4><p class="mut" id="${p}Q${r}"></p>${ta(`${p}_a${r}`,"Acción correctiva concreta")}</div>`).join("")+`</div><p class="mut" id="${p}PA"></p>`;
 return h}
 function upIsh(i){const p="i"+i,{r,T,s}=ish(i);r.forEach(x=>{const bb=$(`#${p}B${x.j}`);if(bb)bb.textContent=x.P?"= "+x.P:"";$(`#${p}P${x.j}`).textContent=x.P||"";const c=$(`#${p}C${x.j}`);c.textContent=T?x.c.toFixed(1)+"%":"";c.style.backgroundImage=T?`linear-gradient(90deg,var(--acc2) ${Math.min(100,x.c*3)}%,transparent 0)`:"";$(`#${p}R${x.j}`).textContent=x.r;$(`[data-cz="${x.j}"]`).textContent=v(`${p}_${x.j}_c`)});$(`#${p}T`).textContent=T||"";
-let acc=0;[1,2,3].forEach(k=>{const x=s[k-1];$(`#${p}H${k}`).innerHTML=`<span class="r">${k}</span>${T&&x.P?esc(x.m+": "+(v(`${p}_${x.j}_c`)||"sin causa")):"Se llena con tu tabla"}`;$(`#${p}Q${k}`).textContent=T?`Ponderación ${x.P} · ${x.c.toFixed(1)}% del total`:"";if(T)acc+=x.c});$(`#${p}PA`).textContent=T?`Las 3 primeras causas concentran ${acc.toFixed(1)}% de la ponderación total (principio de Pareto).`:""}
+let acc=0;[1,2,3].forEach(k=>{const x=s[k-1];$(`#${p}H${k}`).innerHTML=`<span class="r">${k}</span>${T&&x.P?esc(x.m+": "+(v(`${p}_${x.j}_c`)||"sin causa")):"Se llena con tu tabla"}`;$(`#${p}Q${k}`).textContent=T?`Ponderación ${x.P} · ${x.c.toFixed(1)}% del total`:"";if(T)acc+=x.c});$(`#${p}PA`).textContent=T?`Tus 3 causas prioritarias concentran ${acc.toFixed(1)}% del puntaje de la matriz de priorización (I × F × Fa). Ojo: esto no es un Pareto, porque los puntajes los asignas tú; un Pareto usa defectos contados en la realidad.`:""}
 function lay(R){const dep={},lv=[];R.forEach(a=>dep[a[0]]=a[3]?1+Math.max(...[...a[3]].map(x=>dep[x])):0);R.forEach(a=>(lv[dep[a[0]]]=lv[dep[a[0]]]||[]).push(a[0]));const W=132,H=98,GX=70,GY=20,mx=Math.max(...lv.map(l=>l.length)),tw=lv.length*(W+GX)-GX,th=mx*(H+GY)-GY,pos={};lv.forEach((l,c)=>l.forEach((id,r)=>pos[id]=[c*(W+GX),(th-(l.length*(H+GY)-GY))/2+r*(H+GY)]));return{pos,tw,th,W,H}}
 function rCpm(i){const e=D.C[i],p="r"+i,{pos,tw,th}=lay(e.rows);
 let h=head(5+i)+`<div class="cs"><div><b>Contexto (cualitativo)</b>${e.ctx}</div><div><b>Datos (cuantitativos)</b>${e.dat}</div></div>
@@ -250,5 +250,127 @@ $("#ibar").textContent="Alumno de Ejemplo · Demostración · Folio REC-000000";
 $("#demo").onclick=startDemo;
 show(Math.min(S.cur||0,N-1));
 </script>
+<style>
+.tut{border:2px dashed #7a5cfa;border-radius:12px;padding:12px 14px;margin:14px 0;background:color-mix(in srgb,#7a5cfa 6%,var(--card))}
+.tut h4{font-size:1rem;margin:0 0 4px;color:#7a5cfa}.tut>.mut{margin:0 0 8px}
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:10px}
+.tc{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card);font-size:.86rem}
+.tc b.tn{display:block;font:700 .84rem Outfit,sans-serif;margin-bottom:4px}
+.tm{display:flex;gap:7px;align-items:flex-start;margin:4px 0;line-height:1.35}
+.tm i{flex:0 0 20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 .72rem Outfit,sans-serif;font-style:normal;color:#fff}
+.tm.ok i{background:var(--ok)}.tm.w i{background:#e8590c}.tm.q i{background:#7a5cfa}
+.tf{margin-top:6px}.tf .tm{font-size:.82rem}
+.tsum{font:700 .85rem Outfit,sans-serif;margin:2px 0 8px}
+</style>
+<script>
+/* ===== Tutor guiado · capa aditiva =====
+   No modifica casos (D), claves (K), calificación ni lo que ya está guardado.
+   Solo lee las respuestas y muestra preguntas y pistas. */
+(function(){
+const STOP=new Set("para,como,pero,porque,este,esta,estos,estas,esto,solo,sola,tiene,tienen,desde,hasta,entre,sobre,cuando,donde,ellos,ella,tambien,otro,otra,otros,otras,bien,todo,toda,todos,todas,alguna,algun,menos,mismo,misma,ademas,cual,cuales,quien,mucho,mucha,muchos,muchas,poco,pocos,hace,hacer,cada,ultimo,ultima,despues,antes,falta,hay".split(","));
+const nz=s=>String(s??"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const tk=s=>nz(s).split(/[^a-z0-9ñ]+/).filter(w=>w.length>=4&&!STOP.has(w)&&!/^\d+$/.test(w)).map(w=>w.slice(0,6));
+const has=(s,l)=>{const t=nz(s);return l.some(x=>t.includes(x))};
+const DEF=["las personas: cuántas son, su experiencia, capacitación, rotación o forma de pago","equipos, herramientas o sistemas físicos y su mantenimiento","el procedimiento: pasos, secuencia, reglas o forma de organizar el trabajo","los insumos o la información que entra al proceso y su calidad","cómo se controla, inspecciona o registra el desempeño","las condiciones del lugar: espacio, luz, ruido, temperatura, tráfico o clima"];
+const EFF=["defect","queja","retras","abandon","devoluc","llega tarde","fuera del plazo","fuera de plazo","reclam","lentitud","tardan","tarda mucho"];
+const INV=["contrat","compr","reemplaz","flota","maquin","equipo","ampli","vacante","sueldo","salari","invers","remodel","instal","analizador","camionet","estufa","freidora","respaldo"];
+const FREQ=["diari","cada ","siempre","todos los","turno","a diario","por dia","al dia","mensual","al mes","3 de cada","1 de cada","de cada"];
+const WHO=["responsable","gerente","supervisor","jefe","encargad","lider","coordinador","recursos humanos","rh ","direccion","director","mantenimiento","calidad","compras","tecnico","dueno","dueño","administrador","area de"];
+const WHEN=["dia","semana","mes","diario","cada","turno","plazo","fecha","inmediat","hora","trimestr","anual","antes de","a partir"];
+const VAGUE=/^(mejorar|capacitar|supervisar|revisar|checar|controlar|cambiar|arreglar|hablar|motivar|corregir)\b/;
+const ic={ok:"✓",w:"!",q:"?"};
+const li=(t,m)=>`<div class="tm ${t}"><i>${ic[t]}</i><span>${m}</span></div>`;
+const L=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" y "+a.at(-1);
+const nv=k=>{const x=v(k);return x===""||x==null?null:+x};
+const U1=u=>u=="semanas"?"semana":"día";
+
+/* ---------- ISHIKAWA ---------- */
+function tuI(i){const box=$(`#i${i}TU`);if(!box)return;const e=D.I[i],p="i"+i,PR=new Set(tk(e.prob)),EV=e.ev.map(t=>new Set(tk(t).filter(w=>!PR.has(w))));let cards="",rated=[];
+M6.forEach((m,j)=>{const c=String(v(`${p}_${j}_c`)).trim(),I=+v(`${p}_${j}_I`)||0,F=+v(`${p}_${j}_F`)||0,A=+v(`${p}_${j}_A`)||0,o=[];
+ if(!c)o.push(["q",`Lee la evidencia de <b>${m}</b> y escribe con tus palabras qué está provocando el problema. Recuerda: <b>${m}</b> abarca ${DEF[j]}.`]);
+ else{const eff=has(c,EFF),t=tk(c).filter(w=>!PR.has(w)),own=t.filter(w=>EV[j].has(w)).length;let bk=-1,bo=0;EV.forEach((s,k)=>{if(k==j)return;const x=t.filter(w=>s.has(w)).length;if(x>bo){bo=x;bk=k}});
+  const words=c.split(/\s+/).filter(Boolean).length,num=/\d/.test(c),evN=(e.ev[j].match(/\d+(?:[.,]\d+)?\s?(?:%|°C|lux|dB|m²|min|horas|días|meses)?/g)||[]).map(x=>x.trim()).filter((x,k,a)=>a.indexOf(x)==k);
+  if(words<4)o.push(["w","Tu causa es muy breve. Una buena causa dice <b>qué falla</b> y <b>cómo se nota</b>. ¿Qué pasa exactamente y qué dato del caso lo prueba?"]);
+  if(eff&&own<2)o.push(["w","Esto suena al <b>efecto</b> (el problema), no a su causa. Pregúntate: <em>¿por qué ocurre esto?</em> Lo que respondas es la causa."]);
+  if(eff&&own<2){}else if(bk>=0&&bo>own&&bo>=2)o.push(["w",`Tu causa se parece más a la evidencia de <b>${M6[bk]}</b> que a la de ${m}. ¿En qué espina va realmente? Recuerda: <b>${m}</b> abarca ${DEF[j]}.`]);
+  else if(own==0)o.push(["w",`No encuentro en tu causa ningún hecho de la evidencia de ${m}. ¿Qué dato del caso la respalda?`]);
+  if(!num&&evN.length)o.push(["q",`Dale soporte con un dato: la evidencia trae cifras como <b>${esc(evN.slice(0,3).join(" · "))}</b>. ¿Cuál demuestra tu causa?`]);
+  if(!o.some(x=>x[0]=="w"))o.push(["ok",num&&own>=2?"Bien sustentada: se apoya en la evidencia y trae un dato. Para llegar a la causa raíz, pregúntate una vez más: <em>¿por qué pasa esto?</em>":"Vas bien. Para hacerla más sólida, agrega el dato que la prueba y pregúntate: <em>¿por qué pasa esto?</em>"]);
+  if(I&&F&&A){const ev=e.ev[j]+" "+c;rated.push([I,F,A]);
+   if(A>=4&&has(ev,INV))o.push(["q",`Calificaste Facilidad <b>${A}</b> (muy fácil), pero corregir esto parece requerir comprar, contratar o reparar. ¿Se resuelve rápido y barato de verdad?`]);
+   if(A<=2&&(j==2||j==4)&&!has(ev,INV))o.push(["q",`Calificaste Facilidad <b>${A}</b> (difícil). Cambiar un procedimiento o empezar a medir suele costar poco. ¿Qué lo haría difícil en este caso?`]);
+   if(F<=2&&has(e.ev[j],FREQ))o.push(["q",`Calificaste Frecuencia <b>${F}</b> (casi nunca), pero la evidencia sugiere que ocurre de forma constante. ¿Cada cuánto pasa realmente?`]);
+   if(I<=2&&/\d+\s?%|\d+ de \d+/.test(e.ev[j]))o.push(["q",`Impacto <b>${I}</b> es bajo, y la evidencia trae porcentajes o proporciones. Si eliminaras esta causa, ¿cuánto bajaría el problema?`]);
+   if(I==5&&F==5&&A==5)o.push(["q","Le diste 5 en todo. ¿Es a la vez lo más grave, lo más frecuente y lo más fácil de corregir? Compárala con las demás espinas."]);
+  }else o.push(["q","Falta calificar. Justifica cada número con la evidencia: <b>I</b> ¿qué tanto afecta? · <b>F</b> ¿cada cuánto pasa? · <b>Fa</b> ¿qué tan fácil y barato es corregirla?"]);
+ }
+ cards+=`<div class="tc"><b class="tn">${m}</b>${o.map(x=>li(...x)).join("")}</div>`});
+let g="";if(rated.length==6){if(rated.every(r=>r.join()==rated[0].join()))g+=li("w","Calificaste igual las 6 causas. La matriz sirve para <b>distinguir</b>: ¿de verdad pesan lo mismo?");else if(new Set(rated.map(r=>r[0])).size==1)g+=li("q","Diste el mismo Impacto a todas las causas. ¿Cuál afecta más al problema medido? Ordénalas mentalmente antes de calificar.");
+ const {s,T}=ish(i);if(T)s.slice(0,3).forEach((x,k)=>{if(x.I<=2)g+=li("q",`Tu prioridad ${k+1} (${x.m}) tiene Impacto ${x.I}: sube de lugar por ser fácil o frecuente. ¿Es lo que más conviene atacar primero?`)});if(!g)g=li("ok","Tus calificaciones distinguen entre causas. Revisa que cada número lo puedas defender con un dato del caso.")}
+box.innerHTML=`<h4>Tutor · ¿tus causas están bien sustentadas?</h4><p class="mut">Estas preguntas no cambian tu calificación: te ayudan a revisar tu razonamiento. Se actualizan mientras escribes.</p><div class="tg">${cards}</div>${g?`<div style="margin-top:8px">${g}</div>`:""}`;
+tuA(i)}
+function tuA(i){const p="i"+i,e=D.I[i],{s,T}=ish(i);[1,2,3].forEach(r=>{const el=$(`#${p}AF${r}`);if(!el)return;const x=s[r-1];if(!T||!x||!x.P){el.innerHTML="";return}
+ const cz=String(v(`${p}_${x.j}_c`)).trim(),a=String(v(`${p}_a${r}`)).trim(),o=[];
+ if(!a)o.push(["q",`¿Qué harías para eliminar la causa de <b>${x.m}</b>${cz?`: «${esc(cz)}»`:""}? Una buena acción dice <b>qué</b>, <b>quién</b>, <b>cuándo</b> y <b>cuánto</b>.`]);
+ else{const words=a.split(/\s+/).length,link=tk(a).filter(w=>new Set([...tk(cz),...tk(e.ev[x.j])]).has(w)).length,miss=[];
+  if(words<8)o.push(["w","Tu acción es muy breve. Descríbela para que otra persona pueda ejecutarla sin preguntarte."]);
+  else if(VAGUE.test(nz(a))&&words<12)o.push(["w","Eso es una intención, no una acción concreta. ¿Cómo exactamente, con qué y en qué plazo?"]);
+  if(!link)o.push(["w",`Tu acción no menciona nada de la causa que ataca (${x.m}). ¿Cómo la elimina?`]);
+  if(!/\d/.test(a))miss.push("<b>¿cuánto?</b> (una meta o cantidad)");if(!has(a,WHEN))miss.push("<b>¿cuándo o cada cuánto?</b>");if(!has(a,WHO))miss.push("<b>¿quién es responsable?</b>");
+  if(miss.length)o.push(["q","Para que sea medible, agrega: "+L(miss)+"."]);
+  if(!o.length)o.push(["ok",`Acción completa. Último reto: ¿qué indicador del problema («${esc(e.prob.split(".")[0])}») te diría que funcionó?`]);}
+ el.innerHTML=o.map(y=>li(...y)).join("")})}
+
+/* ---------- RUTA CRÍTICA ---------- */
+const OPEN=new Set();
+function tuC(i){const box=$(`#r${i}TU`);if(!box)return;const p="r"+i;
+if(!OPEN.has(p)){box.innerHTML=`<h4>Tutor · revisa tu razonamiento</h4><p class="mut" style="margin:0">Pulsa «Revisar respuestas». Para cada dato incorrecto verás una pregunta que te ayuda a encontrar el error, sin darte el resultado.</p>`;return}
+const e=D.C[i],R=e.rows,ws=[];let tot=0,ok=0;
+const chk=k=>{const r=ver(k);if(r!==null){tot++;if(r)ok++}return r===false};
+R.forEach(a=>{const id=a[0],t=a[2],pre=[...a[3]],suc=R.filter(x=>x[3].includes(id)).map(x=>x[0]),
+ IC=nv(`${p}_${id}_IC`),TC=nv(`${p}_${id}_TC`),IL=nv(`${p}_${id}_IL`),TL=nv(`${p}_${id}_TL`),o=[];
+ if(chk(`${p}_${id}_IC`)){if(!pre.length)o.push(`<b>IC</b>: ${id} no depende de ninguna actividad. ¿Cuándo puede empezar algo que no espera a nadie?`);
+  else{const pt=pre.map(x=>nv(`${p}_${x}_TC`));if(pt.some(x=>x===null))o.push(`<b>IC</b>: primero calcula el TC de ${L(pre)}. En la ida se avanza de izquierda a derecha.`);
+   else{const mx=Math.max(...pt),mn=Math.min(...pt);if(IC==mx)o.push(`<b>IC</b>: es coherente con tus TC de ${L(pre)}, así que el error viene de antes. Revisa esas actividades.`);
+    else if(pre.length>1&&IC==mn)o.push(`<b>IC</b>: tomaste el <b>menor</b> TC. ${id} debe esperar a que terminen <b>todas</b> sus previas (${pre.map((x,k)=>x+" = "+pt[k]).join(", ")}): ¿cuál termina al último?`);
+    else o.push(`<b>IC</b> = el mayor TC de sus previas: ${pre.map((x,k)=>x+" = "+pt[k]).join(", ")}. ¿Cuál es el mayor?`)}}}
+ if(chk(`${p}_${id}_TC`))o.push(IC!==null&&TC!==IC+t?`<b>TC</b> = IC + duración. Con tu IC: ${IC} + ${t} = ?`:`<b>TC</b>: tu suma está bien; el error está en el IC de ${id}.`);
+ if(chk(`${p}_${id}_TL`)){if(!suc.length)o.push(`<b>TL</b>: ${id} es la actividad final, así que su TL es la duración total del proyecto. ¿Cuál es el mayor TC de toda la red?`);
+  else{const si=suc.map(x=>nv(`${p}_${x}_IL`));if(si.some(x=>x===null))o.push(`<b>TL</b>: primero calcula el IL de ${L(suc)}. El regreso va de derecha a izquierda.`);
+   else{const mn=Math.min(...si),mx=Math.max(...si);if(TL==mn)o.push(`<b>TL</b>: es coherente con tus IL de ${L(suc)}, así que el error viene de ahí. Revísalas.`);
+    else if(suc.length>1&&TL==mx)o.push(`<b>TL</b>: tomaste el <b>mayor</b> IL. En el regreso se toma el <b>menor</b> (${suc.map((x,k)=>x+" = "+si[k]).join(", ")}), porque ${id} no puede retrasar a ninguna de las que siguen.`);
+    else o.push(suc.length==1?`<b>TL</b> = el IL de la actividad que sigue (${suc[0]}). Compara lo que escribiste en ambos lugares.`:`<b>TL</b> = el menor IL de las que siguen: ${suc.map((x,k)=>x+" = "+si[k]).join(", ")}. ¿Cuál es el menor?`)}}}
+ if(chk(`${p}_${id}_IL`))o.push(TL!==null&&IL!==TL-t?`<b>IL</b> = TL − duración. Con tu TL: ${TL} − ${t} = ?`:`<b>IL</b>: tu resta está bien; el error está en el TL de ${id}.`);
+ const sv=v(`${p}_${id}_s`);if(sv!==""&&chk(`${p}_${id}_s`)){const h=IL!==null&&IC!==null?IL-IC:null;o.push(sv=="1"?`<b>Marca</b>: la marcaste como crítica. Con tus números su holgura es ${h===null?"IL − IC = ?":"IL − IC = "+IL+" − "+IC+" = "+h}. Una actividad crítica tiene holgura 0.`:`<b>Marca</b>: la marcaste como no crítica. Calcula su holgura IL − IC${h===null?"":" = "+h}. Si da 0, ¿qué significa?`)}
+ if(o.length)ws.push(`<div class="tc"><b class="tn">Actividad ${id} · duración ${t}</b>${o.map(m=>li("w",m)).join("")}</div>`)});
+const g=[],T=nv(p+"_T"),hh=nv(p+"_hh"),dd=nv(p+"_dd"),cc=nv(p+"_cc"),hk=e.hk;
+const myTC=R.map(a=>nv(`${p}_${a[0]}_TC`));
+if(chk(p+"_ruta")){const ls=String(v(p+"_ruta")).toUpperCase().replace(/[^A-Z]/g,"").split(""),bad=[],brk=[];
+ ls.forEach((x,k)=>{const a=R.find(r=>r[0]==x);if(!a){bad.push(x+" (no existe)");return}const c=nv(`${p}_${x}_IC`),l=nv(`${p}_${x}_IL`);if(c!==null&&l!==null&&l-c!=0)bad.push(`${x} (holgura ${l-c})`);if(k&&!a[3].includes(ls[k-1]))brk.push(`${x} no depende de ${ls[k-1]}`)});
+ g.push(li("w",`<b>Ruta crítica</b>: debe ir del inicio al final, pasando solo por actividades con holgura 0, y cada una debe depender de la anterior.${bad.length?" Revisa: "+L(bad)+".":""}${brk.length?" Además, "+L(brk)+".":""}`))}
+if(chk(p+"_T")){const mx=myTC.every(x=>x!==null)?Math.max(...myTC):null;g.push(li("w",mx!==null&&T==mx?"<b>Duración</b>: coincide con tu red, así que el error viene de los TC. Revisa la ida.":"<b>Duración mínima</b> = el TC de la actividad final, o sea el mayor TC de toda la red. ¿Cuál es en tu red?"))}
+if(chk(p+"_hh")){const c=nv(`${p}_${hk}_IC`),l=nv(`${p}_${hk}_IL`);g.push(li("w",c!==null&&l!==null&&hh==l-c?`<b>Holgura de ${hk}</b>: es coherente con tu red; el error está en el IC o el IL de ${hk}.`:`<b>Holgura de ${hk}</b> = IL − IC.${c!==null&&l!==null?` En tu red: ${l} − ${c} = ?`:""}`))}
+if(chk(p+"_dd"))g.push(li("w",dd==e.dl?`<b>Retraso del proyecto</b>: pusiste el retraso completo de la actividad (${e.dl}). Pero la holgura absorbe una parte: retraso del proyecto = ${e.dl} − holgura (si sale negativo, es 0).`:hh!==null&&dd==Math.max(0,e.dl-hh)?"<b>Retraso</b>: es coherente con tu holgura; el error está en la holgura.":`<b>Retraso del proyecto</b> = retraso de ${hk} (${e.dl}) − su holgura. Si la holgura alcanza, el proyecto no se retrasa (0).`));
+if(chk(p+"_cc"))g.push(li("w",cc==e.dl*e.cpd&&e.dl!=dd?`<b>Costo</b>: multiplicaste el retraso de la <b>actividad</b>. El costo depende del retraso del <b>proyecto</b>: tu retraso × ${fmt(e.cpd)} por ${U1(e.u)}.`:dd!==null&&cc==dd*e.cpd?"<b>Costo</b>: es coherente con tu retraso; el error está en el retraso.":`<b>Costo</b> = retraso del proyecto × ${fmt(e.cpd)} por ${U1(e.u)}.`));
+const x=String(v(p+"_x")).trim(),ddOk=Math.max(0,e.dl-e.sol[hk].H),q=[];
+if(!x)q.push("Escribe tu decisión: ¿qué harías y por qué? Apóyate en la holgura, el retraso y el costo que calculaste.");
+else{if(!/\d/.test(x))q.push("Tu decisión no trae números. Inclúyelos: holgura, retraso y costo.");if(!has(x,["holgura","margen"]))q.push("Explica qué papel jugó la <b>holgura</b> en el resultado.");
+ if(ddOk>0&&!has(x,["contrat","aceler","compr","reasign","negoci","horas extra","turno","subcontrat","traslap","paralel","proveedor","agencia","refuerz","recurso"]))q.push("¿Qué harías concretamente para recuperar el tiempo? Compara: ¿cuesta menos acelerar o pagar el retraso?");
+ if(ddOk==0)q.push(`Si el proyecto no se retrasa, ¿qué vigilarías ahora? ¿A ${hk} le queda margen después del retraso?`)}
+{const r2=R.map(a=>a[0]==hk?[a[0],a[1],a[2]+e.dl,a[3]]:a),s2=solve(r2),n2=paths(r2,s2.o),n1=paths(R,e.sol);if(n2.join()!=n1.join())q.push("Reto: con el retraso, ¿sigue siendo la misma ruta crítica? Recalcula mentalmente y revisa si cambió.")}
+const all=tot&&ok==tot;
+box.innerHTML=`<h4>Tutor · revisa tu razonamiento</h4><p class="tsum">${tot?`Datos correctos: ${ok} de ${tot} capturados.`:"Aún no hay datos para revisar."} ${all?"¡Todo lo que capturaste está bien!":"Sigue las preguntas para encontrar cada error; no te damos el número, te damos el camino."}</p>${ws.length?`<div class="tg">${ws.join("")}</div>`:""}${g.length?`<div style="margin-top:8px">${g.join("")}</div>`:""}<div style="margin-top:8px">${q.map(m=>li("q",m)).join("")}</div>`}
+
+/* ---------- montaje sin tocar lo existente ---------- */
+function mount(n){const m=n<5?0:n<10?1:2,i=n%5;
+ if(m==0){const p="i"+i,t=$(`#${p}T`);if(t&&!$(`#${p}TU`))t.closest(".sc").insertAdjacentHTML("afterend",`<div class="tut" id="${p}TU"></div>`);[1,2,3].forEach(r=>{const a=$(`[data-k="${p}_a${r}"]`);if(a&&!$(`#${p}AF${r}`))a.insertAdjacentHTML("afterend",`<div class="tf" id="${p}AF${r}"></div>`)});tuI(i)}
+ if(m==1){const p="r"+i,b=$(`[data-chk="${p}"]`);if(b&&!$(`#${p}TU`))b.parentNode.insertAdjacentHTML("afterend",`<div class="tut" id="${p}TU"></div>`);tuC(i)}}
+const _show=show;show=function(n){_show(n);try{mount(n)}catch(x){console.warn("tutor",x)}};
+document.addEventListener("input",()=>{try{const m=S.cur<5?0:S.cur<10?1:2;if(m==0)tuI(S.cur);if(m==1)tuC(S.cur%5)}catch(x){}});
+document.addEventListener("click",ev=>{try{const b=ev.target.closest("[data-chk]");if(b&&b.dataset.chk[0]=="r"){OPEN.add(b.dataset.chk);tuC(+b.dataset.chk.slice(1))}else if(ev.target.closest(".ctr")&&S.cur>=5&&S.cur<10)tuC(S.cur%5)}catch(x){}});
+try{mount(S.cur)}catch(x){}
+})();
+</script>
+
 </body>
 </html>
