@@ -372,5 +372,74 @@ try{mount(S.cur)}catch(x){}
 })();
 </script>
 
+<style>
+.tw{margin:8px 0}.tw td,.tw th{font-size:.84rem}.tw td.k{font-weight:700;background:color-mix(in srgb,var(--crit) 12%,var(--card))}
+.stp{counter-reset:s;list-style:none;padding:0;margin:6px 0}.stp li{position:relative;padding:4px 0 4px 34px;font-size:.9rem}
+.stp li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:3px;width:24px;height:24px;border-radius:50%;background:#7a5cfa;color:#fff;display:grid;place-items:center;font:700 .78rem Outfit,sans-serif}
+.tree{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}@media(max-width:700px){.tree{grid-template-columns:1fr}}
+.tree>div{border-radius:10px;padding:10px 12px;font-size:.88rem}.tree .y{background:color-mix(in srgb,var(--ok) 12%,var(--card));border:1.5px solid var(--ok)}.tree .n{background:color-mix(in srgb,var(--crit) 10%,var(--card));border:1.5px solid var(--crit)}
+.tree b.h{display:block;font:700 .9rem Outfit,sans-serif;margin-bottom:4px}.tree ul{margin:4px 0 0;padding-left:18px}
+.qq{background:var(--soft);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.9rem;text-align:center;font-weight:700}
+.calc{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin:6px 0}.calc label{margin:0}.calc input{width:130px}.calc .out{flex:1 1 260px;font-size:.88rem}
+.exd{background:var(--soft);border-left:4px solid #7a5cfa;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:.88rem}
+.ck{list-style:none;padding:0;margin:4px 0}.ck li{font-size:.84rem;padding:2px 0}.ck li b{display:inline-block;width:20px}
+</style>
+<script>
+/* ===== Tutorial de ruta crítica y guía de decisión · capa aditiva =====
+   Ejemplo resuelto con un proyecto DISTINTO a los calificados. No guarda nada ni cambia respuestas. */
+(function(){
+const nz=s=>String(s??"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const has=(s,l)=>{const t=nz(s);return l.some(x=>t.includes(x))};
+const U1=u=>u=="semanas"?"semana":"día";
+const EXR=[["A","Diseñar la nueva tienda",2,""],["B","Tramitar permisos",4,"A"],["C","Comprar mobiliario",3,"A"],["D","Obra civil",5,"B"],["E","Instalar mobiliario",2,"CD"],["F","Capacitar al personal",3,"A"],["G","Reapertura",1,"EF"]];
+function tutorial(){const {o,T}=solve(EXR);
+const rows=EXR.map(a=>{const x=o[a[0]],c=x.H==0;return `<tr><td${c?' class="k"':""}>${a[0]}</td><td class="l">${a[1]}</td><td>${a[3]?a[3].split("").join(", "):"—"}</td><td>${a[2]}</td><td>${x.IC}</td><td>${x.TC}</td><td>${x.IL}</td><td>${x.TL}</td><td${c?' class="k"':""}>${x.H}</td></tr>`}).join("");
+return `<details class="card tut"><summary>📘 Tutorial paso a paso: cómo resolver la red y cómo tomar la decisión (ejemplo resuelto)</summary>
+<p class="mut">Este ejemplo es de un proyecto distinto al tuyo y no se califica. Úsalo como modelo y después aplica los mismos pasos a tu caso.</p>
+<div class="exd"><b>Ejemplo: remodelación de la tienda «Coco Shop».</b> Duración en días. Cada día de retraso en reabrir cuesta $5,000 en ventas.</div>
+<div class="sc"><table class="tw" style="min-width:620px"><tr><th>Act.</th><th>¿Qué se hace?</th><th>Antes</th><th>Dur.</th><th>IC</th><th>TC</th><th>IL</th><th>TL</th><th>Holgura</th></tr>${rows}</table></div>
+<h4 style="margin:12px 0 4px">Paso 1 · Recorrido de ida (izquierda → derecha): IC y TC</h4>
+<ol class="stp"><li><b>IC</b> = el <b>mayor</b> TC de las actividades que van antes. Si no tiene ninguna, IC = 0. <i>Se toma el mayor porque hay que esperar a que terminen todas.</i></li>
+<li><b>TC</b> = IC + duración.</li>
+<li>Ejemplo: E necesita a C (TC 5) y a D (TC 11). Espera a la que termina al último: IC de E = <b>11</b>, TC = 11 + 2 = <b>13</b>.</li>
+<li>La <b>duración mínima</b> es el TC de la última actividad: <b>${T} días</b>.</li></ol>
+<h4 style="margin:12px 0 4px">Paso 2 · Recorrido de regreso (derecha → izquierda): TL e IL</h4>
+<ol class="stp"><li>La última actividad tiene <b>TL</b> = duración total (${T}).</li>
+<li><b>TL</b> = el <b>menor</b> IL de las actividades que siguen. <i>Se toma el menor porque no puedes retrasar a ninguna de ellas.</i></li>
+<li><b>IL</b> = TL − duración.</li>
+<li>Ejemplo: A va antes de B (IL 2), C (IL 8) y F (IL 10). El menor es 2: TL de A = <b>2</b>, IL = 2 − 2 = <b>0</b>.</li></ol>
+<h4 style="margin:12px 0 4px">Paso 3 · Holgura y ruta crítica</h4>
+<ol class="stp"><li><b>Holgura</b> = IL − IC: cuánto puede retrasarse una actividad sin retrasar el proyecto.</li>
+<li>Las actividades con holgura 0 forman la <b>ruta crítica</b>: aquí <b>A‑B‑D‑E‑G</b>. En tu red, márcalas con 1 clic y a las demás con 2 clics.</li>
+<li>C tiene 6 días de holgura y F tiene 8: pueden atrasarse ese tiempo sin afectar la reapertura.</li></ol>
+<h4 style="margin:12px 0 4px">Paso 4 · Cómo se toma la decisión</h4>
+<div class="qq">¿El retraso de la actividad es mayor que su holgura?</div>
+<div class="tree"><div class="y"><b class="h">NO: la holgura lo absorbe</b>Retraso del proyecto = 0 · Costo = $0<ul><li>No gastes en acelerar: no hay nada que recuperar.</li><li>Calcula el margen que queda: holgura − retraso.</li><li>Vigila la actividad y pide una fecha firme al responsable.</li></ul></div>
+<div class="n"><b class="h">SÍ: el proyecto se retrasa</b>Retraso del proyecto = retraso − holgura · Costo = ese retraso × costo por unidad<ul><li><b>Acelerar</b> una actividad crítica (más gente, horas extra, proveedor urgente) solo si cuesta <b>menos</b> que el retraso que evita.</li><li><b>Traslapar</b>: hacer en paralelo algo que iba en serie.</li><li><b>Mover recursos</b> desde actividades con holgura.</li><li><b>Aceptar</b> el retraso si acelerar cuesta más, y avisar a los afectados.</li></ul></div></div>
+<p style="margin:6px 0 2px"><b>Escenario 1 · Compra de mobiliario (C) se retrasa 4 días</b></p>
+<div class="exd">C tiene holgura de 6 días (IL 8 − IC 2). Como 4 es menor que 6, el retraso se absorbe: la tienda reabre en 14 días y el costo es $0. Decisión: no pagar envío urgente; pedir al proveedor una fecha de entrega por escrito y revisarla cada 2 días, porque a C ya solo le quedan 2 días de margen (6 − 4).</div>
+<p style="margin:10px 0 2px"><b>Escenario 2 · Obra civil (D) se retrasa 3 días</b></p>
+<div class="exd">D está en la ruta crítica (holgura 0), así que los 3 días pasan completos al proyecto: reabre en 17 días y cuesta 3 × $5,000 = $15,000. Opción: una cuadrilla extra cuesta $8,000 y recupera 2 días, o sea, evita $10,000. Como $8,000 &lt; $10,000, conviene: el costo total queda en $8,000 + $5,000 del día restante = $13,000, en lugar de $15,000. Decisión: contratar la cuadrilla, que el supervisor de obra dé seguimiento diario, y revisar que la ruta crítica siga siendo A‑B‑D‑E‑G.</div>
+<h4 style="margin:12px 0 4px">Paso 5 · Cómo redactar tu decisión (5 elementos)</h4>
+<ol class="stp"><li><b>Diagnóstico</b>: la holgura de la actividad y cómo la obtuviste (IL − IC).</li><li><b>Consecuencia</b>: cuánto se retrasa el proyecto y cuánto cuesta, con la operación.</li><li><b>Acción</b>: qué harías exactamente.</li><li><b>Justificación</b>: por qué conviene, comparando costos o riesgos.</li><li><b>Seguimiento</b>: qué vigilarías ahora (margen restante, ruta crítica, responsable).</li></ol></details>`}
+function guide(i){const e=D.C[i],u=e.u,u1=U1(u);return `<div class="tut" id="r${i}GD"><h4>Guía para tu decisión · ${esc(e.t)}</h4>
+<p class="mut">Tu caso: <b>${e.hk}</b> se retrasa <b>${e.dl} ${u}</b> y cada ${u1} de retraso del proyecto cuesta <b>${fmt(e.cpd)}</b>. Sigue estos pasos con <b>tus</b> números de la red.</p>
+<ol class="stp"><li>Localiza <b>${e.hk}</b> en tu red y anota su IC y su IL.</li><li><b>Holgura de ${e.hk}</b> = IL − IC.</li><li>Compara: ¿${e.dl} ${u} es mayor que esa holgura? Si <b>no</b>, el retraso del proyecto es 0. Si <b>sí</b>, el retraso del proyecto es ${e.dl} − holgura.</li><li><b>Costo</b> = retraso del proyecto × ${fmt(e.cpd)}. Ojo: se multiplica el retraso del <b>proyecto</b>, no el de la actividad.</li><li>Decide con el árbol del tutorial y relee el contexto: ¿qué dice de proveedores, personal o clientes que cambie lo que conviene hacer?</li></ol>
+<div class="calc"><div><label>Si acelerar cuesta ($)</label><input type="number" min="0" id="r${i}k1" placeholder="ej. 20000"></div><div><label>y recupera (${u})</label><input type="number" min="0" id="r${i}k2" placeholder="ej. 1"></div><div class="out" id="r${i}k3">Prueba aquí si te conviene acelerar: compara lo que cuesta acelerar contra lo que evitas pagar.</div></div></div>`}
+function calc(i){const e=D.C[i],a=+$(`#r${i}k1`)?.value||0,b=+$(`#r${i}k2`)?.value||0,o=$(`#r${i}k3`);if(!o)return;if(!a&&!b){o.innerHTML="Prueba aquí si te conviene acelerar: compara lo que cuesta acelerar contra lo que evitas pagar.";return}
+const ev=b*e.cpd,n=ev-a;o.innerHTML=`Evitas ${b} ${b==1?U1(e.u):e.u} × ${fmt(e.cpd)} = <b>${fmt(ev)}</b>; acelerar cuesta <b>${fmt(a)}</b>. ${n>0?`<span style="color:var(--ok);font-weight:700">Conviene: ahorras ${fmt(n)}.</span>`:n<0?`<span style="color:var(--bad);font-weight:700">No conviene: pierdes ${fmt(-n)}.</span>`:"Da lo mismo: decide por el riesgo."} Recuerda: solo sirve si de verdad hay retraso del proyecto que recuperar.`}
+const CK=[["Diagnóstico: mencionas la holgura con su número",x=>has(x,["holgura","margen"])&&/\d/.test(x)],["Consecuencia: dices cuánto se retrasa el proyecto y cuánto cuesta",x=>has(x,["retras","no se retrasa","sin retraso"])&&(has(x,["costo","cuesta","$","pesos"]))],["Acción: propones algo concreto",x=>has(x,["contrat","aceler","compr","reasign","negoci","horas extra","turno","subcontrat","traslap","paralel","proveedor","agencia","refuerz","recurso","pedir","solicit","programar","acept","no gast","no pagar","mantener"])],["Justificación: explicas por qué conviene",x=>has(x,["porque","ya que","conviene","por lo tanto","compar","en lugar","mas barato","menos que","mayor que","menor que","ahorr","vale la pena","no es necesario"])],["Seguimiento: dices qué vigilarías ahora",x=>has(x,["vigil","seguimiento","monitor","ruta critica","margen","riesgo","plan b","fecha","revis","supervis"])]];
+function ck(i){const el=$(`#r${i}DX`);if(!el)return;const x=String(v(`r${i}_x`)||"");const r=CK.map(([t,f])=>[t,!!x.trim()&&f(x)]),n=r.filter(y=>y[1]).length;
+el.innerHTML=`<p class="tsum" style="margin:6px 0 2px">Tu decisión tiene ${n} de 5 elementos</p><ul class="ck">${r.map(([t,ok])=>`<li><b style="color:${ok?"var(--ok)":"var(--mut)"}">${ok?"✓":"○"}</b>${t}</li>`).join("")}</ul><p class="mut" style="margin:2px 0 0">Esta lista revisa que tu respuesta esté completa, no que tus números sean correctos.</p>`}
+function mount2(n){if(n<5||n>=10)return;const i=n%5,p="r"+i,st=$("#stage");if(!st)return;const h3=[...st.querySelectorAll("h3")];
+ const net=h3.find(h=>h.textContent.startsWith("Red de nodos"));if(net&&!st.querySelector("details.tut"))net.insertAdjacentHTML("beforebegin",tutorial());
+ const dec=h3.find(h=>h.textContent.startsWith("Decisión gerencial"));if(dec&&!$(`#${p}GD`)){const q=dec.nextElementSibling;(q||dec).insertAdjacentHTML("afterend",guide(i))}
+ const ta=$(`[data-k="${p}_x"]`);if(ta&&!$(`#${p}DX`))ta.insertAdjacentHTML("afterend",`<div class="tf" id="${p}DX"></div>`);ck(i);calc(i)}
+const _s=show;show=function(n){_s(n);try{mount2(n)}catch(x){console.warn("tutorial",x)}};
+document.addEventListener("input",ev=>{try{if(S.cur<5||S.cur>=10)return;const i=S.cur%5;if(ev.target.id&&/^r\dk[12]$/.test(ev.target.id))calc(i);ck(i)}catch(x){}});
+try{mount2(S.cur)}catch(x){}
+})();
+</script>
+
 </body>
 </html>
