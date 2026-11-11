@@ -18,8 +18,13 @@ Es una página estática de un solo archivo (`index.html`), sin dependencias ni 
 3. En **Settings → Pages**, elige *Deploy from a branch*, rama `main`, carpeta `/ (root)`.
 4. Tu enlace será `https://TU-USUARIO.github.io/NOMBRE-DEL-REPO/`.
 
-Para fijar el plazo para los alumnos, agrega al final del enlace el texto que genera
-**Control docente** (por ejemplo `#cierre-20261110-2359-p0`).
+## Plazo y prórroga (automático para todos)
+El plazo vive en `config.json`. Todas las páginas lo leen al abrir y cada 2 minutos.
+En **Control docente** cambia la fecha/hora límite, activa la prórroga con su fecha y hora de fin
+y pulsa **Guardar y publicar para todos** (la primera vez pega una llave de GitHub con permiso
+*Contents: Read and write* solo sobre este repositorio; se guarda solo en tu navegador).
+Las entregas hechas antes del plazo original siguen como «A tiempo» y el avance de los alumnos no se borra.
+Respaldo: el enlace con `#cierre-AAAAMMDD-HHMM-p1-AAAAMMDD-HHMM` sigue funcionando si no hay config.json.
 
 ## Notas
 - El avance de cada alumno se guarda en el navegador del dispositivo (`localStorage`).
